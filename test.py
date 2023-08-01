@@ -1,3 +1,4 @@
+# %%
 import threading, os, requests, pandas as pd, numpy as np
 from datetime import datetime, timedelta
 
@@ -64,3 +65,4 @@ if __name__=='__main__':
     finally:
         from Valera import alert
         alert()
+# %%
