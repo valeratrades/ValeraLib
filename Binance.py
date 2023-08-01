@@ -1,16 +1,23 @@
-import os, json
+import os, json, requests
+
+# <argument-duck-types>
+class Market:
+    def __init__(self, market_type):
+        if market_type not in ['perp', 'spot']:
+            raise ValueError("Valid options for market are 'perp' or 'spot'")
+        self.market_type = market_type
+# </argument-duck-types>
 
 class Binance():
     # This is fucking genius: I'll have self.perp_symbols, self.spot_symbol and self.marg_symbols; then I can define self.functions for collecting data given symbols in the general case.
     def __init__(self):
-        self.perp_symbols = get_binance_perp_symbols()
+        self.perp_symbols = get_symbols('perp')
+        self.spot_symbors = get_symbols('spt')
         
-    def dump(self, market):
-        """
-        market can be "perp", "spot", "marg"
-        #! as of this moment, implemented only "perp"
-        """
-        symbols = self.perp_symbols
+        
+    def dump(self, market: Market):
+        symbols = self.perp_symbols if market=="perp" else self.spot_symbols
+        
         import inspect
         caller_frame = inspect.stack()[1]
         caller_filename_full = caller_frame.filename
@@ -20,16 +27,32 @@ class Binance():
             file_name = 'src/' + file_name
         json.dump(symbols, open(file_name, 'w'))
         
-
-def get_binance_perp_symbols():
+def get_symbols(market: Market):
     """
-    returns list of listed perps; f: ['BTCUSDT', ...]
+    market can be "perp" or "spot"
+    returns full list of USDT tickers from the specified market; f: ['BTCUSDT', ...]
     """
-    import requests
-    url = 'https://fapi.binance.com/fapi/v1/ticker/24hr'
-    r = requests.get(url)
-    assert r.status_code == requests.codes.ok, f"dump_binance_perf_coins()'s request failed with status code: {r.status_code}"
-    data = r.json()
+        
+    urls = {
+        'perp': 'https://fapi.binance.com/fapi/v1/ticker/24hr',
+        'spot': 'https://api.binance.com/api/v3/ticker/24hr'
+    }
+    
+    url = urls[market]
     to_drop = ['USDC', 'BTCDOM', 'BTCST']
+    
+    r = requests.get(url)
+    assert r.status_code == requests.codes.ok, f"get_perp_symbors()'s request failed with status code: {r.status_code}"
+    data = r.json()
     coins = [ticker['symbol'] for ticker in data if ticker['symbol'][-4:]=='USDT' and not ticker['symbol'][:-4] in to_drop]
     return coins
+
+if __name__=='__main__':
+    try:
+        binance = Binance()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+    finally:
+        from Valera import alert
+        alert()
