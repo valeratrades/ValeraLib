@@ -1,0 +1,3 @@
+##Each todo is structured as f"{moduleName}; {functionName}; {todo}"
+
+Binance; getKlines; move the stats away to DataScience

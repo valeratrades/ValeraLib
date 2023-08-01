@@ -5,8 +5,7 @@ def dbg(*args):
     print("\n#==========================================================")
     print(args[0])
     for arg in args[1:]:
-        print('/n')
-        print(arg)
+        print(f'\n{arg}')
     print("#==========================================================\n")
     alert()
     input()

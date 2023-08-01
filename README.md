@@ -1,1 +1,2 @@
-# My Utils
+# Guidelines:
+- camelcase

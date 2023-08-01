@@ -1,7 +1,7 @@
 """
 All time values are by default ms timestamps
 """
-import plotly.graph_objects as go, numpy as np, pandas as pd
+import plotly.graph_objects as go, numpy as np, pandas as pd, time
 from IPython.display import Image
 
 def fromRaw(pandas_df):
@@ -79,3 +79,16 @@ def plotly_closes(dictOfDatetimePandasDfs):
     fig.update_yaxes(range=[normalized_df.min().min(), normalized_df.max().max()])
 
     return fig
+
+if __name__=='__main__':
+    try:
+        from Binance import Binance
+        b = Binance()
+        data = b.CollectKlinesForSymbols('perp', time.time()-24*60*60, time.time(), '5m')
+        plotly_closes(data)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+    finally:
+        from Valera import alert
+        alert()
