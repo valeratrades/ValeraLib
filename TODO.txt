@@ -1,3 +1,7 @@
 ##Each todo is structured as f"{moduleName}; {functionName}; {todo}"
 
 Binance; getKlines; move the stats away to DataScience
+
+DuckTypes; Timestamp; remove any possibility of introducing a float number by applying Timestamp. (currently a mess which is seen through print statements in Klines.Normalize)
+
+General: Figure out the use of breakpoints both in general and with aid of Jupyter at last!

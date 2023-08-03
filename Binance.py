@@ -10,14 +10,13 @@ class Binance():
         self.symbols = list(set(self.perp_symbols+self.spot_symbols))
         
     def GetKlines(self, symbol:USDTSymbol, startTime:Timestamp, endTime:Timestamp, tf:BinanceTf, market:Market) -> Klines:
-        startTimestamp, endTimestamp, market = Timestamp(startTime), Timestamp(endTime), Market(market)
-        _, _ = USDTSymbol.check(symbol), BinanceTf.check(tf)
+        symbol, startTimestamp, endTimestamp, tf, market = USDTSymbol(symbol), Timestamp(startTime), Timestamp(endTime), BinanceTf(tf), Market(market)
         assert startTimestamp.Unix_ms < endTimestamp.Unix_ms, "Your dumb ass has likely switched up endTime and startTime in arguments"
-        assert symbol in self.symbols, f"Unknown symbol: {symbol}"
+        assert symbol.V in self.symbols, f"Unknown symbol: {symbol.V}"
         
         params = {
-            "symbol": symbol,
-            "interval": tf,
+            "symbol": symbol.V,
+            "interval": tf.V,
             "startTime": startTimestamp.Unix_ms,
             "endTime": endTimestamp.Unix_ms,
         }
@@ -26,13 +25,13 @@ class Binance():
         raw_data = requests.get(url, params=params).json()
         df = pd.DataFrame(raw_data, columns=['open_ms', 'open', 'high', 'low', 'close', 'volume', 'close_ms', 'quote_asset_volume', 'trades', 'taker_buy_base', 'taker_buy_quote', 'ignore'])
         
-        df = df['open', 'high', 'low', 'close', 'quote_asset_volume', 'trades']
-        df = df.rename(columns={"quote_asset_volume":"volume"})
         df['open_time'] = pd.to_datetime(df['open_ms'], unit='ms')
+        df.set_index('open_time', inplace=True, drop=False)
+        df = df[['open', 'high', 'low', 'close', 'quote_asset_volume', 'trades']]
+        df = df.rename(columns={"quote_asset_volume":"volume"})
         
         #todo: these things move out of the df and outside into a separate model
         # df['close'] = pd.to_numeric(df['close'])
-        # df.set_index('open_time', inplace=True, drop=False)
         # df['return'] = df['close'].pct_change() + 1
         # df.iloc[0, df.columns.get_loc('return')] = 1 # set first datapoint to one
         # df['cumulative_return'] = df['return'].cumprod()

@@ -129,7 +129,8 @@ class Klines:
             assert column in value.columns
         value[mandatoryColumns] = value[mandatoryColumns].apply(pd.to_numeric)
         return value
-    def collectFullData(self):
+    def CollectFullData(self):
+        raise 'Not Implemented Yet'
         assert (self.Market != None and self.Tf == None), "Klines object should have both self.Market and self.Tf specified for this function to be collable"
         _, _ = Market.check(self.Market), BinanceTf.check(self.Tf)
             
@@ -137,11 +138,12 @@ class Klines:
         df = self.V
         zeroIndex = df.index[0] if dtTimestamp == None else Timestamp(dtTimestamp).datetime
         columns = ['open', 'high', 'low', 'close', 'volume', 'oi', 'lsr']
-        dbg(df.columns, 'open' in df.columns)
         for column in columns:
             if column in df.columns:
                 zeroValue = df.loc[zeroIndex, column]
-                df.loc[column] = df.loc[column].apply(lambda x: round(np.log( x /zeroValue)*100, 3)-100)
+                print(df[column])
+                df[column] = df[column].apply(lambda x: round(np.log( x /zeroValue)*100, 3)-100)
+                print(df[column])
                 
 class SymbolsKlines:
     def __init__(self, klinesDict):
@@ -158,9 +160,9 @@ class SymbolsKlines:
     def Normalize(self, dtTimestamp:Timestamp=None):
         for symbol, klinesDf in self.V.items():
             klinesDf.Normalize(dtTimestamp)
-    def ToOpensDf(self):
-        raise "Not implemented yet"
+    def ToClosesDf(self) -> ClosesDf:
+        raise "Not Implemented Yet"
         klinesDict = self.V
-        # here we deal with Klines objects inside and turn the thing into opensDf
-        opensDf = None
-        return opensDf
+        # here we deal with Klines objects inside and turn the thing into closesDf
+        closesDf = None
+        return closesDf
