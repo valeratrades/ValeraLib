@@ -5,9 +5,9 @@ from .src.DuckTypes import *
 
 class Binance():
     def __init__(self):
-        self.perp_symbols = getSymbols('perp')
-        self.spot_symbols = getSymbols('spot')
-        self.symbols = list(set(self.perp_symbols+self.spot_symbols))
+        self.perp_symbols:list[str] = getSymbols('perp')
+        self.spot_symbols:list[str] = getSymbols('spot')
+        self.symbols:list[str] = list(set(self.perp_symbols+self.spot_symbols))
         
     def GetKlines(self, symbol:USDTSymbol, startTime:Timestamp, endTime:Timestamp, tf:BinanceTf, market:Market) -> Klines:
         symbol, startTimestamp, endTimestamp, tf, market = USDTSymbol(symbol), Timestamp(startTime), Timestamp(endTime), BinanceTf(tf), Market(market)
@@ -88,7 +88,7 @@ class Binance():
             file_name = 'src/' + file_name
         json.dump(symbols, open(file_name, 'w'))
         
-def getSymbols(market: Market) -> list[USDTSymbol]:
+def getSymbols(market: Market) -> list[str]:
     _ = Market(market)
     """
     returns full list of USDT tickers from the specified market; f: ['BTCUSDT', ...]
