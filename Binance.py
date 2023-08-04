@@ -1,7 +1,7 @@
 import os, json, requests, threading, pandas as pd, numpy as np, time
 from datetime import datetime, timedelta
 
-from src.DuckTypes import *
+from .src.DuckTypes import *
 
 class Binance():
     def __init__(self):
