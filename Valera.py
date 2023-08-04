@@ -40,26 +40,6 @@ def tg_msg(text=""):
 def shutdown():
     os.system("shutdown /s /t 1")
 
-def d(timestamp):
-    t = timestamp
-    if len(str(round(timestamp)))==13:
-        t = t/1000
-    t = round(t)
-    return datetime.fromtimestamp(t)
-
-def to_ms(timestamp):
-    try:
-        dt = datetime.fromisoformat(timestamp)
-        timestamp = dt.timestamp() * 1000
-    except: pass
-    try: timestamp = timestamp.timestamp()*1000 # if it's regular datetime
-    except: pass
-    timestamp = round(timestamp)
-    if len(str(timestamp))==10:
-        timestamp *= 1000
-    assert len(str(timestamp))==13, "expecting timestamp in 'ms'"
-    return timestamp
-
 def load(path):
     if not path.endswith('.json'):
         path += '.json'
@@ -101,7 +81,7 @@ class TimePerfCounters():
             print(total_print)
         self.perfcounters = [self.perfcounters[-1]]
 
-def decide_on_datetime_format(*args, format_str='%Y-%m-%d %H:%M:%S'):
+def decide_on_datetime_format(*args, format_str='%Y-%m-%d %H:%M:%S'): #//
     if len(args)==2:
         CASE = 'strings'
         t1, t2 = args
@@ -145,7 +125,7 @@ def decide_on_datetime_format(*args, format_str='%Y-%m-%d %H:%M:%S'):
     return out
     
     
-def round_time_down(dt, round_to=300): #// deprecating
+def round_time_down(dt, round_to=300): #// move to be a property of .src.DuckTypes class Timestamp
     timestamp = dt.to_ms() / 1000
     rounded_timestamp = timestamp // round_to * round_to
     return datetime.fromtimestamp(rounded_timestamp)
