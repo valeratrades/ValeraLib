@@ -2,6 +2,6 @@
 
 Binance; getKlines; move the stats away to DataScience
 
-DuckTypes; Timestamp; remove any possibility of introducing a float number by applying Timestamp. (currently a mess which is seen through print statements in Klines.Normalize)
-
 General: Figure out the use of breakpoints both in general and with aid of Jupyter at last!
+
+DataScience; plotly_closes; 1) rename the function 2) make it work with arbitrary n, auto-deciding on how many things to plot in color 3) add an argument for what to use as labels

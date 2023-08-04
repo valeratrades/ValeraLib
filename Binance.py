@@ -25,8 +25,8 @@ class Binance():
         raw_data = requests.get(url, params=params).json()
         df = pd.DataFrame(raw_data, columns=['open_ms', 'open', 'high', 'low', 'close', 'volume', 'close_ms', 'quote_asset_volume', 'trades', 'taker_buy_base', 'taker_buy_quote', 'ignore'])
         
-        df['open_time'] = pd.to_datetime(df['open_ms'], unit='ms')
-        df.set_index('open_time', inplace=True, drop=False)
+        df['close_dt'] = pd.to_datetime(df['close_ms'], unit='ms')
+        df.set_index('close_dt', inplace=True, drop=False)
         df = df[['open', 'high', 'low', 'close', 'quote_asset_volume', 'trades']]
         df = df.rename(columns={"quote_asset_volume":"volume"})
         
@@ -43,6 +43,9 @@ class Binance():
         return k
         
     def CollectKlinesForSymbols(self, symbols:list[USDTSymbol], startTime:Timestamp, endTime:Timestamp, tf:BinanceTf, market:Market=None) -> SymbolsKlines:
+        """
+        Takes 15-20s
+        """
         if symbols == 'perp':
             symbols = self.perp_symbols
         if symbols == 'spot':
@@ -57,11 +60,11 @@ class Binance():
         errors = []
         def fetch_data(symbol, klinesDict):
             try:
-                k = self.GetKlines(symbol, startTime, endTime, tf)
+                k = self.GetKlines(symbol, startTime, endTime, tf, market)
                 klinesDict[symbol] = k
             except Exception as e:
                 failedOn_buffer.append(symbol)
-                errors.append(e)
+                errors.append(f"{type(e).__name__}: {str(e)}")
         klinesDict = {}
         threads = []
         for symbol in symbols:
@@ -71,9 +74,11 @@ class Binance():
         for thread in threads:
             thread.join()
         
-        print(f"**DEBUG**: Failed to fetch data for {len(failedOn_buffer)} symbols: {failedOn_buffer}")
+        if len(failedOn_buffer) != 0:
+            print(f"**DEBUG**: Failed to fetch data for {len(failedOn_buffer)} symbols: {failedOn_buffer}")
         assert len(failedOn_buffer)<len(symbols)/2, f"Request failed. Errors encountered: {list(set(errors))}"
-        return klinesDict
+        sk = SymbolsKlines(klinesDict)
+        return sk
         
     def Dump(self, market: Market):
         _ = Market(market)

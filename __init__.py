@@ -6,5 +6,4 @@ rtd = round_time_down
 tw = time_wrapper
 sw = silent_wrapper
 
-from .src.DuckTypes import *
 from .Binance import Binance as Binance
