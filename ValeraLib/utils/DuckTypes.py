@@ -78,6 +78,7 @@ class BinanceTf(ClassTemplate):
         num = int(tf[:-1])
         interval = tf[-1]
         map = {
+            's': 1,
             'm': 60,
             'h': 60*60,
             'd': 24*60*60,

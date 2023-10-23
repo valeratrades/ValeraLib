@@ -1,9 +1,8 @@
-from setuptools import setup, find_packages
-# rm -rf dist build && python setup.py sdist bdist_wheel
+from setuptools import setup, find_packages, os
 
 setup(
     name="ValeraLib",
-    version="1.0.0",
+    version=os.environ.get("UPLOAD_WITH_VERSION", "1.0.0"),
     description="The library goes brrrrrr",
     long_description=open("README.md", "r").read(),
     long_description_content_type="text/markdown",
