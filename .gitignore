@@ -1,0 +1,15 @@
+__pycache__/
+.env
+my_keys.json
+TODO.txt
+dist/
+build/
+*.egg-info/
+*.pyc
+*.pyo
+.idea/        # PyCharm IDE configuration
+*.swp         # Vim swap files
+*.swo         # Vim swap files
+.DS_Store     # macOS file system artifacts
+venv/         # Python virtual environment
+*.log         # Log files
