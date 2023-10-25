@@ -8,7 +8,8 @@ class Binance():
         self.PerpSymbols:list[str] = getSymbols('perp')
         self.SpotSymbols:list[str] = getSymbols('spot')
         self.Symbols:list[str] = list(set(self.PerpSymbols+self.SpotSymbols))
-        
+       
+    #TODO! rolling. preemptively calculate the needed queries, request all at once, then merge.
     def GetKlines(self, symbol:USDTSymbol, startTime:Timestamp, endTime:Timestamp, tf:BinanceTf, market:Market) -> Klines:
         symbol, startTimestamp, endTimestamp, tf, market = USDTSymbol(symbol), Timestamp(startTime), Timestamp(endTime), BinanceTf(tf), Market(market)
         assert startTimestamp.Ms < endTimestamp.Ms, "Your dumb ass has likely switched up endTime and startTime in arguments"
@@ -19,6 +20,8 @@ class Binance():
             "interval": tf.V,
             "startTime": startTimestamp.Ms,
             "endTime": endTimestamp.Ms,
+            # this is automatically scaled down when needed, but never up. If not stated, always will cap at 500.
+            "limit": 1000,
         }
         url = market.BinanceBaseUrl + '/klines'
 
@@ -29,19 +32,12 @@ class Binance():
         df.set_index('close_dt', inplace=True, drop=False)
         df = df[['open', 'high', 'low', 'close', 'quote_asset_volume', 'trades']]
         df = df.rename(columns={"quote_asset_volume":"volume"})
-        
-        #todo: these things move out of the df and outside into a separate model
-        # df['close'] = pd.to_numeric(df['close'])
-        # df['return'] = df['close'].pct_change() + 1
-        # df.iloc[0, df.columns.get_loc('return')] = 1 # set first datapoint to one
-        # df['cumulative_return'] = df['return'].cumprod()
-        # df['variace'] = df['close'].var()
-        
+
         k = Klines(df)
         k.Market = market.V
         k.Tf = tf.V
         return k
-        
+
     def CollectKlinesForSymbols(self, symbols:list[USDTSymbol], startTime:Timestamp, endTime:Timestamp, tf:BinanceTf, market:Market=None, full:bool=False) -> SymbolsKlines:
         """
         Takes 15-20s
