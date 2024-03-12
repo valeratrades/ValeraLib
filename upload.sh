@@ -11,7 +11,7 @@ python -m build
 twine upload ./dist/* -u __token__ -p $PYPI_KEY
 
 push_git() {
-	version=$(grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' ./pyproject.toml)
+	version=$(grep -oP '^version = "\K[0-9]+\.[0-9]+\.[0-9]+' ./pyproject.toml)
 	message="."
 	if [ -n "$1" ]; then
 		message="$@"
