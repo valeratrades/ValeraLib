@@ -1,4 +1,4 @@
-import re, time, os
+import re, time, os, sys
 
 file_path = "pyproject.toml"
 
@@ -23,11 +23,10 @@ with open(file_path, "w") as file:
 			if last_modified_min_ago > 5:
 				version = f"{major_minor}{patch+1}"
 			else:
-				version = f"{major_minor}{patch}"
+				version = f"{major_minor}{patch}"  # leaves as is
 			line_to_write = f'version = "{version}"\n'
 
-		if last_modified_min_ago > 5:
-			file.write(line)
+		file.write(line)
 
 assert version != ""
-print(version)
+print(sys.stdout, version)
