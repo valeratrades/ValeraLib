@@ -9,3 +9,13 @@ fi
 rm -rf ./dist ./build
 python -m build
 twine upload ./dist/* -u __token__ -p $PYPI_KEY
+
+push_git() {
+	version=$(grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' ./pyproject.toml)
+	message="."
+	if [ -n "$1" ]; then
+		message="$@"
+	fi
+	git add -A && git commit -m "$message" && git tag -am "${version}" && git push
+}
+push_git
