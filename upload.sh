@@ -16,6 +16,6 @@ push_git() {
 	if [ -n "$1" ]; then
 		message="$@"
 	fi
-	git add -A && git commit -m "$message" && git tag -a "v${version}" -m "v${version}" && git push
+	git add -A && git commit -m "$message" && git tag "v${version}" && git push --follow-tags
 }
 push_git
