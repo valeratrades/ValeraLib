@@ -20,7 +20,7 @@ with open(file_path, "w") as file:
 		if match:
 			major_minor = match.group(2)
 			patch = int(match.group(3))
-			if last_modified_min_ago > 5:
+			if last_modified_min_ago > 0:
 				version = f"{major_minor}{patch+1}"
 			else:
 				version = f"{major_minor}{patch}"  # leaves as is
