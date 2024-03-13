@@ -11,6 +11,7 @@ version = ""
 current_time = time.time()
 last_modified_time = os.path.getmtime("./pyproject.toml")
 last_modified_min_ago = (current_time - last_modified_time) / 60
+print(f"Last modified: {last_modified_min_ago} minutes ago")
 
 with open(file_path, "w") as file:
 	for line in lines:
