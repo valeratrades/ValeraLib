@@ -1,4 +1,4 @@
-from .utils.rust_types import Ok, Err, Result, UnwrapOnErr, Option, Some, N, UnwrapOnNone, p
+from .utils.rust_types import Ok, Err, Result, UnwrapOnErr, Option, Some, N, UnwrapOnNone, p, Mutex
 
 __all__ = [
 	"Ok",
@@ -10,4 +10,5 @@ __all__ = [
 	"N",
 	"UnwrapOnNone",
 	"p",
+	"Mutex",
 ]

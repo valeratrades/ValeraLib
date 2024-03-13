@@ -1,5 +1,8 @@
-from typing import Generic, TypeVar, Any
+from dataclasses import dataclass
+from typing import Generic, TypeVar, Any, ContextManager
 from functools import wraps
+from threading import Lock
+import contextlib
 
 
 # Result
@@ -159,3 +162,54 @@ class N(Option[None]):  # None is named shortly both to avoid conflict with pyth
 
 	def p(self) -> None:
 		return None
+
+
+# Mutex
+# ==============================================================================
+T = TypeVar("T")
+
+
+@dataclass
+class Mutex(Generic[T]):
+	__value: T
+	__lock: Lock
+	__dropped: bool = False
+	"""
+		Rust-like Mutex with lock guarantees
+
+		----------------
+		Usage:
+		```python
+			# Create a mutex wrapping the data
+		mutex = Mutex([])
+
+	# Lock the mutex for the scope of the `with` block
+		with mutex.lock() as value:
+			# value is typed as `list` here
+			value.append(1)
+		```
+	"""
+
+	def __init__(self, value: T):
+		# Name it with two underscores to make it a bit harder to accidentally access the value from the outside.
+		self.__value = value
+		self.__lock = Lock()
+
+	@contextlib.contextmanager
+	def lock(self) -> Result[ContextManager[T], RuntimeError]:
+		if self.__dropped:
+			yield Err(RuntimeError("Mutex has been dropped"))
+		self.__lock.acquire()
+		try:
+			yield Ok(self.__value)
+		finally:
+			self.__lock.release()
+
+	def __str__(self) -> str:
+		return f"Mutex[{self.__value}]"
+
+	def take(self) -> Result[T, RuntimeError]:
+		if self.__dropped:
+			return Err(RuntimeError("Mutex has been dropped"))
+		self.__dropped = True
+		return Ok(self.__value)
