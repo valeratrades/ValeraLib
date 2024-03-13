@@ -1,7 +1,6 @@
 #!/bin/sh
 
 version=$(python .build_utils/bump_version.py)
-echo "Bumping version to $version"
 
 rm -rf ./dist ./build
 python -m build
