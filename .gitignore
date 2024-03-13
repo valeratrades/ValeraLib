@@ -1,15 +1,14 @@
-__pycache__/
-.env
-my_keys.json
-TODO.txt
-dist/
-build/
-*.egg-info/
-*.pyc
-*.pyo
-.idea/        # PyCharm IDE configuration
-*.swp         # Vim swap files
-*.swo         # Vim swap files
-.DS_Store     # macOS file system artifacts
-venv/         # Python virtual environment
-*.log         # Log files
+**/target/
+**/debug/
+**/Cargo.lock
+.DS_Store
+**/*.rs.bk
+*.sw[po]
+.cargo/config.toml
+.cargo/config
+**/.vscode
+**/_*
+**/TODO.md
+.local.sh
+**/tmp/
+.upload_py_lib.sh

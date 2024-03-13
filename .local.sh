@@ -1,9 +1,19 @@
 #!/bin/sh
+# File is sourced on `cs` into the project's root. Allows to define a set of project-specific commands and aliases.
 
-#TODO: with sed add 1 to this value, then resource this script recursively once.
-export UPLOAD_WITH_VERSION="1.0.2"
+u() {
+	version=$(python ${HOME}/s/help_scripts/bump_version.py $(pwd)/pyproject.toml $1) || { return 1; }
 
-alias u="./upload.sh"
+	rm -rf ./dist ./build
+	python -m build
+	twine upload ./dist/* -u __token__ -p $PYPI_KEY
 
-alias g="git add -A && git commit -m '.' && git push"
-
+	push_git() {
+		message="."
+		if [ -n "$1" ]; then
+			message="$@"
+		fi
+		git add -A && git commit -m "$message" && git tag "v${version}" && git push --follow-tags
+	}
+	push_git
+}
