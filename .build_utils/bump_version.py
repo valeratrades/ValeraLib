@@ -1,6 +1,6 @@
 import re, time, os, sys
 
-file_path = "pyproject.toml"
+file_path = sys.argv[1]
 
 with open(file_path, "r") as file:
 	lines = file.readlines()
@@ -9,10 +9,8 @@ pattern = re.compile(r'(version = ")([0-9]+\.[0-9]+\.)([0-9]+)(")')
 version = ""
 
 current_time = time.time()
-last_modified_time = os.path.getmtime("./pyproject.toml")
+last_modified_time = os.path.getmtime(file_path)
 last_modified_min_ago = (current_time - last_modified_time) / 60
-
-print(f"path: {file_path}")
 
 with open(file_path, "w") as file:
 	for line in lines:
@@ -26,10 +24,10 @@ with open(file_path, "w") as file:
 				version = f"{major_minor}{patch+1}"
 			else:
 				version = f"{major_minor}{patch}"  # leaves as is
-			print(f"Version: {version}")
+			# print(f"Version: {version}")
 			line_to_write = f'version = "{version}"\n'
 
 		file.write(line)
 
 assert version != ""
-print(sys.stdout, version)
+print(version)

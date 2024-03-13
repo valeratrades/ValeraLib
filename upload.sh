@@ -1,13 +1,13 @@
 #!/bin/sh
 
-version=$(python .build_utils/bump_version.py)
+version=$(python .build_utils/bump_version.py $(pwd)/pyproject.toml)
+echo $version
 
 rm -rf ./dist ./build
 python -m build
 twine upload ./dist/* -u __token__ -p $PYPI_KEY
 
 push_git() {
-	version=$(grep -oP '^version = "\K[0-9]+\.[0-9]+\.[0-9]+' ./pyproject.toml)
 	message="."
 	if [ -n "$1" ]; then
 		message="$@"
