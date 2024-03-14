@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Generic, TypeVar, Any, ContextManager, Union, NoReturn
+from typing import Generic, TypeVar, Any, ContextManager, Union, NoReturn, Callable, Self
 from functools import wraps
 from threading import Lock
 import contextlib
@@ -9,6 +9,7 @@ import contextlib
 # ==============================================================================
 T = TypeVar("T")
 E = TypeVar("E")
+U = TypeVar("U")
 
 
 def p(func):
@@ -35,13 +36,37 @@ class UnwrapOnErr(ValueError):
 
 
 class Result(Generic[T, E]):
-	def unwrap(self) -> T:
+	def unwrap(self) -> Union[T, NoReturn]:
 		raise NotImplementedError
 
 	def ok_or(self, _or: Any) -> T:
 		raise NotImplementedError
 
 	def is_ok(self) -> bool:
+		raise NotImplementedError
+
+	def is_err(self) -> bool:
+		raise NotImplementedError
+
+	def ok(self):
+		raise NotImplementedError
+
+	def or_(self, res: Self) -> Self:
+		raise NotImplementedError
+
+	def or_else(self, op: Callable[[E], Self]) -> Self:
+		raise NotImplementedError
+
+	def unwrap_or(self, default: T) -> T:
+		raise NotImplementedError
+
+	def unwrap_or_else(self, op: Callable[[E], T]) -> T:
+		raise NotImplementedError
+
+	def map(self, op: Callable[[T], Self]) -> Self:
+		raise NotImplementedError
+
+	def map_err(self, op: Callable[[E], Self]) -> Self:
 		raise NotImplementedError
 
 	def p(self) -> Union[T, NoReturn]:
@@ -67,6 +92,30 @@ class Ok(Result[T, E]):
 	def is_ok(self) -> bool:
 		return True
 
+	def is_err(self) -> bool:
+		return False
+
+	def ok(self):
+		return self.value
+
+	def or_(self, res: Self) -> Self:
+		return self
+
+	def or_else(self, op: Callable[[E], Self]) -> Self:
+		return self
+
+	def unwrap_or(self, default: T) -> T:
+		return self.value
+
+	def unwrap_or_else(self, op: Callable[[E], T]) -> T:
+		return self.value
+
+	def map(self, op: Callable[[T], Self]) -> Self:
+		return Ok(op(self.value))
+
+	def map_err(self, op: Callable[[E], Self]) -> Self:
+		return self
+
 	def p(self) -> T:
 		return self.value
 
@@ -87,11 +136,35 @@ class Err(Result[T, E]):
 	def is_ok(self) -> bool:
 		return False
 
-	def p(self) -> NoReturn:
-		raise self.error
+	def is_err(self) -> bool:
+		return True
 
-	def __str__(self) -> str:
-		return f'Err[{type(self.error).__name__}["{self.error}"]]'
+	def ok(self):
+		return None
+
+	def or_(self, res: Self) -> Self:
+		return res
+
+	def or_else(self, op: Callable[[E], Self]) -> Self:
+		return op(self.error)
+
+	def unwrap_or(self, default: T) -> T:
+		return default
+
+	def unwrap_or_else(self, op: Callable[[E], T]) -> T:
+		return op(self.error)
+
+	def map(self, op: Callable[[T], Self]) -> Self:
+		return Err(self.error)
+
+	def map_err(self, op: Callable[[E], Self]) -> Self:
+		return Err(op(self.error))
+
+		def p(self) -> NoReturn:
+			raise self.error
+
+		def __str__(self) -> str:
+			return f'Err[{type(self.error).__name__}["{self.error}"]]'
 
 
 # Option
@@ -115,6 +188,30 @@ class Option(Generic[T]):
 		raise NotImplementedError
 
 	def unwrap_or(self, default: T) -> T:
+		raise NotImplementedError
+
+	def map(self, op: Callable[[T], U]) -> "Option[U]":
+		raise NotImplementedError
+
+	def map_or(self, default: U, op: Callable[[T], U]) -> U:
+		raise NotImplementedError
+
+	def map_or_else(self, default_op: Callable[[], U], op: Callable[[T], U]) -> U:
+		raise NotImplementedError
+
+	def ok_or(self, err: E) -> "Result[T, E]":
+		raise NotImplementedError
+
+	def ok_or_else(self, err_op: Callable[[], E]) -> "Result[T, E]":
+		raise NotImplementedError
+
+	def or_(self, optb: Self) -> Self:
+		raise NotImplementedError
+
+	def or_else(self, op: Callable[[], Self]) -> Self:
+		raise NotImplementedError
+
+	def replace(self, value: T) -> Self:
 		raise NotImplementedError
 
 	def p(self) -> Union[T, NoReturn]:
@@ -143,6 +240,35 @@ class Some(Option[T]):
 	def unwrap_or(self, default: T) -> T:
 		return self.value
 
+	def map(self, op: Callable[[T], U]) -> "Option[U]":
+		return Some(op(self.value))
+
+	def map_or(self, default: U, op: Callable[[T], U]) -> U:
+		return op(self.value)
+
+	def map_or_else(self, default_op: Callable[[], U], op: Callable[[T], U]) -> U:
+		return op(self.value)
+
+	def ok_or(self, err: E) -> "Result[T, E]":
+		return Ok(self.value)
+
+	def ok_or_else(self, err_op: Callable[[], E]) -> "Result[T, E]":
+		return Ok(self.value)
+
+	def or_(self, optb: "Option[T]") -> "Option[T]":
+		return self
+
+	def or_else(self, op: Callable[[], "Option[T]"]) -> "Option[T]":
+		return self
+
+	def replace(self, value: T) -> "Option[T]":
+		old_value = self.value
+		self.value = value
+		if value is None or value is N:
+			self.value = N()
+			self.__class__ = N
+		return Some(old_value)
+
 	def p(self) -> T:
 		return self.value
 
@@ -155,10 +281,38 @@ class N(Option[None]):  # None is named shortly both to avoid conflict with pyth
 		return True
 
 	def unwrap(self):
-		raise UnwrapOnNone  # TODO!: exclude this from traceback
+		raise UnwrapOnNone("Called `unwrap()` on a `None` value.")
 
 	def unwrap_or(self, default: T) -> T:
 		return default
+
+	def map(self, op: Callable[[T], U]) -> "Option[U]":
+		return N()
+
+	def map_or(self, default: U, op: Callable[[T], U]) -> U:
+		return default
+
+	def map_or_else(self, default_op: Callable[[], U], op: Callable[[T], U]) -> U:
+		return default_op()
+
+	def ok_or(self, err: E) -> "Result[T, E]":
+		return Err(err)
+
+	def ok_or_else(self, err_op: Callable[[], E]) -> "Result[T, E]":
+		return Err(err_op())
+
+	def or_(self, optb: "Option[T]") -> "Option[T]":
+		return optb
+
+	def or_else(self, op: Callable[[], "Option[T]"]) -> "Option[T]":
+		return op()
+
+	def replace(self, value: T) -> "Option[T]":
+		old_value = N()
+		if value is not None and value is not N:
+			self.__class__ = Some
+			self.value = value
+		return old_value
 
 	def p(self) -> NoReturn:
 		raise RuntimeError("Called `unwrap()` on an `None` value.")
@@ -166,9 +320,6 @@ class N(Option[None]):  # None is named shortly both to avoid conflict with pyth
 
 # Mutex
 # ==============================================================================
-T = TypeVar("T")
-
-
 @dataclass
 class Mutex(Generic[T]):
 	__value: T
