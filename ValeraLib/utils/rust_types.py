@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Generic, TypeVar, Any, ContextManager
+from typing import Generic, TypeVar, Any, ContextManager, Union
 from functools import wraps
 from threading import Lock
 import contextlib
@@ -44,7 +44,7 @@ class Result(Generic[T, E]):
 	def is_ok(self) -> bool:
 		raise NotImplementedError
 
-	def p(self) -> T:
+	def p(self) -> Union[T, E]:
 		"""
 		Propagate the error or unwrap the value.
 
@@ -117,7 +117,7 @@ class Option(Generic[T]):
 	def unwrap_or(self, default: T) -> T:
 		raise NotImplementedError
 
-	def p(self) -> T:
+	def p(self) -> Union[T, RuntimeError]:
 		"""
 		Propagate the error or unwrap the value.
 
@@ -160,8 +160,8 @@ class N(Option[None]):  # None is named shortly both to avoid conflict with pyth
 	def unwrap_or(self, default: T) -> T:
 		return default
 
-	def p(self) -> None:
-		return None
+	def p(self) -> RuntimeError:
+		raise RuntimeError("Called `unwrap()` on an `None` value.")
 
 
 # Mutex
