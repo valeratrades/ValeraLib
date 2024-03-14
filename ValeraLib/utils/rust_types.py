@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Generic, TypeVar, Any, ContextManager, Union
+from typing import Generic, TypeVar, Any, ContextManager, Union, NoReturn
 from functools import wraps
 from threading import Lock
 import contextlib
@@ -44,12 +44,12 @@ class Result(Generic[T, E]):
 	def is_ok(self) -> bool:
 		raise NotImplementedError
 
-	def p(self) -> Union[T, E]:
+	def p(self) -> Union[T, NoReturn]:
 		"""
 		Propagate the error or unwrap the value.
 
 		----------------
-		To proagate, call .p() on the Result[object] and annotate the function with @p. It will run the function in a try-except block and return any errors except for UnwrapOnErr and UnwrapOnNone, defined in this module.
+		To propagate, call .p() on the Result[T, E] and annotate the function with @p. It will run the function in a try-except block and return any errors except for UnwrapOnErr and UnwrapOnNone, defined in this module.
 		"""
 		raise NotImplementedError
 
@@ -87,7 +87,7 @@ class Err(Result[T, E]):
 	def is_ok(self) -> bool:
 		return False
 
-	def p(self) -> E:
+	def p(self) -> NoReturn:
 		raise self.error
 
 	def __str__(self) -> str:
@@ -117,7 +117,7 @@ class Option(Generic[T]):
 	def unwrap_or(self, default: T) -> T:
 		raise NotImplementedError
 
-	def p(self) -> Union[T, RuntimeError]:
+	def p(self) -> Union[T, NoReturn]:
 		"""
 		Propagate the error or unwrap the value.
 
@@ -160,7 +160,7 @@ class N(Option[None]):  # None is named shortly both to avoid conflict with pyth
 	def unwrap_or(self, default: T) -> T:
 		return default
 
-	def p(self) -> RuntimeError:
+	def p(self) -> NoReturn:
 		raise RuntimeError("Called `unwrap()` on an `None` value.")
 
 
