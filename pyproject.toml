@@ -1,6 +1,6 @@
 [project]
 name = "ValeraLib"
-version = "1.4.0"
+version = "1.4.1"
 description = "The library goes brrrrrr"
 keywords = ["The greatest package to ever exist"]
 readme = "README.md"
